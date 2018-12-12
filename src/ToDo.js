@@ -8,31 +8,42 @@ const edit = {
   borderB: '.5px solid green',
 };
 
-const TaskInput = Styled.input`
-  width: 90%;
-  height: 30px;
-  padding: 0;
-  font-size: 24px;
-  text-align: center;
-  margin-top: 3%;
-  background-color: hsla(51, 93%, 59%, 1);
-  border: .5px solid hsla(51, 93%, 59%,1);
-`;
+const Cont = Styled.div`
+  display: flex; 
+  flex-flow: column nowrap; 
+  justify-content: center;
+  align-items: center;
 
-const TaskList = Styled.input`
-  width: 80%;
-  height: 20px;
-  padding: 0;
-  font-size: 18px;
-  text-align: left;
-  margin: 2% 1% 0 1%;
-  border: none;
-  border-bottom: ${edit.borderB};
+   .taskCont {
+     width: 90%;
+     height: auto;
+     display: flex;
+     flex-flow: row nowrap;
+   }
 
-  :disabled {
-    background-color: transparent;
-  }
-`;
+
+   .taskInput {
+      width: 90%;
+      height: 30px;
+      padding: 0;
+      font-size: 24px;
+      text-align: center;
+      margin-top: 3%;
+      background-color: hsla(51, 93%, 59%, 1);
+      border: .5px solid hsla(51, 93%, 59%,1);
+   }
+
+   .listCont {
+      width: 90%;
+      height: 240px;
+      margin: 1.5% 0 0 0;
+      display: flex;
+      padding: 1%;
+      flex-flow: column nowrap;
+      overflow: auto;
+   }
+`
+
 
 const Button = Styled.div`
   height: 30px;
@@ -44,28 +55,29 @@ const Button = Styled.div`
   }
 `;
 
-const TaskCont = Styled.div`
-width: 90%;
-height: auto;
-display: flex;
-flex-flow: row nowrap;
-`;
 
-const ListCont = Styled.div`
-width: 90%;
-height: 240px;
-margin: 1.5% 0 0 0;
-display: flex;
-padding: 1%;
-flex-flow: column nowrap;
-overflow: auto;
-`;
 
 
 const LinePack = Styled.div`
-display: flex;
-flex-flow: row nowrap;
-min-height: 24px;
+  display: flex;
+  flex-flow: row nowrap;
+  min-height: 24px;
+
+   input {
+    width: 80%;
+    height: 20px;
+    padding: 0;
+    font-size: 18px;
+    text-align: left;
+    margin: 2% 1% 0 1%;
+    border: none;
+    border-bottom: ${edit.borderB};
+
+    :disabled {
+      background-color: transparent;
+    }
+   }
+      
 `;
 
 
@@ -83,24 +95,34 @@ export default class ToDo extends React.Component {
 
 
   insertTask = (...param) => {
-    let nl = <LinePack key={this.state.indexKey}>
+
+    let { indexKey, list } = this.state;
+
+    let nl = <LinePack key={indexKey}>
+
                 <Button>
                   <i className="fas fa-chevron-right"></i>
                 </Button>
 
-                  <TaskList data-key={this.state.indexKey} type="text" name={param[0]} defaultValue={param[1]} placeholder="Default" disabled={true}/>
+                <input type="text" data-key={indexKey}
+                       name={param[0]} 
+                       defaultValue={param[1]} 
+                       placeholder="Default" 
+                       disabled={true}/>
 
                 <Button name="edit" >
                   <i  className="fas fa-pen" onClick={this.handleClick}></i>
                 </Button>
+
                 <Button name="delete">
                   <i className="fas fa-minus" onClick={this.handleClick}></i>
                 </Button>
+
             </LinePack>
 
 
-    this.setState({indexKey: this.state.indexKey+1});
-    this.setState({list: [nl,...this.state.list]})
+    this.setState({indexKey: indexKey+1});
+    this.setState({list: [nl,...list]})
   }
 
 
@@ -146,30 +168,43 @@ export default class ToDo extends React.Component {
   }
 
 
+  handleSubmit = (e) => {
+    e.preventDefault();
+    let { taskInput } = this.state; 
+    let ln = taskInput.split(' ');
+    this.setState({[ln[0]]: taskInput});
+    this.insertTask(ln[0], taskInput);
+  }
+
+
   handleChange = (e) => {
     this.setState({[e.target.getAttribute('name')]: e.target.value})
   }
 
 
-  render(){
+  render() {
 
-    console.log("editing here ", this.state.editing)
+    let { handleSubmit } = this;
+    let { taskInput } = this.state;
+
+    console.log("task input: ", taskInput);
+
 
     return (
-      <div style={{display: 'flex', flexFlow: 'column nowrap', justifyContent: 'center', alignItems: 'center'}}>
-
-        <TaskCont>
-          <TaskInput name="taskInput" onChange={this.handleChange} value={this.state.taskInput} placeholder="Write To-Do Here" />
+      <Cont>
+        <form className="taskCont" onSubmit={handleSubmit}>
+          <input type="text" className="taskInput" name="taskInput" 
+                 onChange={this.handleChange} value={this.state.taskInput}
+                 placeholder="Write To-Do Here" />
             <Button name="addTask">
                 <i className="fas fa-2x fa-plus" onClick={this.handleClick}></i>
             </Button>
-        </TaskCont>
+        </form>
 
-        <ListCont>
+        <div className="listCont">
           {this.state.list}
-        </ListCont>
-
-      </div>
+        </div>
+      </Cont>
     )
   }
 }
